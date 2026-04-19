@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 from enum import Enum
 
 
@@ -13,7 +13,8 @@ class ZoneType(Enum):
 class Zone:
     """zone class used to repsenet zone in the program"""
     def __init__(self, name: str, color: Optional[str],
-                 zone_type: ZoneType, capacity: int, is_srtend: bool, x: int, y: int):
+                 zone_type: ZoneType, capacity: int, is_srtend: bool, x: int,
+                 y: int):
         self.name = name
         self.color = color
         self.zone_type = zone_type
