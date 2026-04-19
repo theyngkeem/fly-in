@@ -16,7 +16,7 @@ class Drone:
     def __init__(self, id: int, drone_state: DroneState, current_zone: Zone,
                  path: List[Zone]):
         self.id = id
-        self.drone_type = drone_state
+        self.drone_type = drone_state        
         self.current_zone = current_zone
         self.path = path
         self.wait_c = 0
