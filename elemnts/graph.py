@@ -1,6 +1,6 @@
 from typing import Any
-from .zone import Zone, Bridge
-from .drone import Drone
+from .zone import Zone, Bridge, ZoneType
+from .drone import Drone, DroneState
 
 
 class Graph:
@@ -14,11 +14,11 @@ class Graph:
     def creat_zone(self, zones: dict[str, Any]) -> list[Zone]:
         """creat ZOnes that been parsed"""
         res = []
-        for zone in zones.keys():
+        for zone in zones.values():
             el = Zone(zone["name"], zone["optional"]["color"],
-                      zone["optional"]["zone"], zone["optional"]["max_drones"],
-                      True
-                      if zone["name"] == ("start_hub" | "end_hub") else False,
+                      ZoneType(zone["optional"]["zone"]),
+                      zone["optional"]["max_drones"],
+                      zone["type"],
                       zone["x"], zone["y"])
             res.append(el)
         return res
@@ -27,7 +27,8 @@ class Graph:
         """creat bridges"""
         res = []
         for bridge in connection:
-            el = Bridge(bridge["first_zone"], bridge["destination"],
+            el = Bridge(self.zones(bridge["first_zone"]),
+                        self.zones(bridge["destination"]),
                         bridge["optional"]["max_link_capacity"])
             res.append(el)
         return res
@@ -36,5 +37,6 @@ class Graph:
         """creat drones"""
         res = []
         for i in range(nb_drones):
-            res.append(Drone(i, "waiting", "start_hub", self.path))
-        res
+            res.append(Drone(i, DroneState.waiting, self.zones("start_hub"),
+                             self.path))
+        return res
