@@ -1,6 +1,6 @@
 from enum import Enum
 from .zone import Zone
-from typing import List
+from typing import List, Optional
 
 
 class DroneState(Enum):
@@ -13,23 +13,22 @@ class DroneState(Enum):
 
 class Drone:
     """drone class used to represent drone in the program"""
-    def __init__(self, id: int, drone_state: DroneState, current_zone: Zone,
-                 path: List[Zone]):
-        self.id = id
-        self.drone_type = drone_state
+    def __init__(self, id: int, drone_state: DroneState, current_zone: Zone):
+        self.drone_id = id
+        self.drone_state = drone_state
         self.current_zone = current_zone
-        self.path = path
+        self.path = []
+        self.path_schdl = []
         self.wait_c = 0
-        self.to_reach = 0
-        self.path_id = 0
+        self.path_index = 0
 
     def next_zone(self) -> Zone | None:
         """get next zone from path"""
-        if self.path[self.path_id + 1]:
-            return self.path[self.path_id + 1]
+        if self.path_index + 1 < len(self.path):
+            return self.path[self.path_index + 1]
         return None
 
     def is_delivered(self) -> bool:
-        if self.drone_type == DroneState.delivered:
+        if self.drone_state == DroneState.delivered:
             return True
         return False
