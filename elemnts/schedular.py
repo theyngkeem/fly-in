@@ -35,6 +35,8 @@ class ReservationPath:
         for i in range(len(path) - 1):
             zone1, turn = path[i]
             zone2, _ = path[i + 1]
+            if zone1 == zone2:
+                continue
             flag = False
             for neighbor, bridge in graph.get_nighbor(zone1):
                 if neighbor.name == zone2.name:
