@@ -1,6 +1,7 @@
 from typing import Any, Tuple
 from .zone import Zone, Bridge, ZoneType
 from .drone import Drone, DroneState
+import heapq
 
 
 class Graph:
@@ -10,7 +11,7 @@ class Graph:
         self.connections = self.creat_conn(connection)
         self.map = self.creat_map()
         self.drones = self.creat_drone(nb_drone)
-        self.path = self.bfs()
+        self.best_op = self.djikstra()
 
     def creat_zone(self, zones: dict[str, Any]) -> dict[str, Zone]:
         """creat ZOnes that been parsed"""
@@ -73,3 +74,25 @@ class Graph:
             if nighbor.accecible:
                 res.append((nighbor, br))
         return res
+
+    def djikstra(self) -> dict[Zone, float]:
+        """DJIKSTRA to get shortest path from end to zone givven"""
+        tobo = []
+        heapq.heappush(tobo, (0.0, self.end_hub))
+        costs = {self.end_hub: 0.0}
+        while tobo:
+            cost, zone = heapq.heappop(tobo)
+            if cost > costs[zone]:
+                continue
+            for nighbor, _ in self.get_nighbor(zone):
+                if not nighbor.accecible:
+                    continue
+                ncost = 0
+                if nighbor.zone_type == ZoneType.priority:
+                    ncost = cost + 0.9
+                else:
+                    ncost = cost + nighbor.cost
+                if nighbor not in costs or ncost < costs[nighbor]:
+                    costs[nighbor] = ncost
+                    heapq.heappush(tobo, (ncost, nighbor))
+        return costs
