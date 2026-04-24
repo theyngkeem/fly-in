@@ -25,8 +25,8 @@ class Simulator:
         """run the simulator and print the result"""
         turn = 0
         while not self.check_all_delivered():
-            turn += 1
             moves = self.turn_ev.get(turn, [])
+            turn += 1
             if not moves:
                 continue
             output = []

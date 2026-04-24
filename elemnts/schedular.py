@@ -71,7 +71,6 @@ class Scheduler:
             self.reservation.use_path(path, self.graph)
         return self.graph.drones
 
-
     def calcul_flow(self) -> list[int]:
         """calculate how much can i sed in the firt turn"""
         outflow = 0
