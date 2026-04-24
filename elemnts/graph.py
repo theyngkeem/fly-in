@@ -80,10 +80,10 @@ class Graph:
     def djikstra(self) -> dict[Zone, float]:
         """DJIKSTRA to get shortest path from end to zone givven"""
         tobo = []
-        heapq.heappush(tobo, (0.0, self.end_hub))
+        heapq.heappush(tobo, (0.0, self.end_hub.name, self.end_hub))
         costs = {self.end_hub: 0.0}
         while tobo:
-            cost, zone = heapq.heappop(tobo)
+            cost, _, zone = heapq.heappop(tobo)
             if cost > costs[zone]:
                 continue
             for nighbor, _ in self.get_nighbor(zone):
@@ -95,5 +95,5 @@ class Graph:
                     ncost = cost + nighbor.cost
                 if nighbor not in costs or ncost < costs[nighbor]:
                     costs[nighbor] = ncost
-                    heapq.heappush(tobo, (ncost, nighbor))
+                    heapq.heappush(tobo, (ncost, nighbor.name, nighbor))
         return costs

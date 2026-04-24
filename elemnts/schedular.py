@@ -95,12 +95,12 @@ class Scheduler:
         start = (self.graph.start_hub, start_turn)
         g = 0
         f = g + self.graph.best_op[self.graph.start_hub]
-        heapq.heappush(tobo, (f, g, start[0], start[1]))
+        heapq.heappush(tobo, (f, g, start[0].name, start[0], start[1]))
         visited = set()
         from_zone = {}
         g_arch = {start: 0}
         while tobo:
-            f, g, zone, turn = heapq.heappop(tobo)
+            f, g, _, zone, turn = heapq.heappop(tobo)
             if (zone, turn) in visited:
                 continue
             visited.add((zone, turn))
@@ -121,7 +121,7 @@ class Scheduler:
                 g_arch[new_zone] = new_g
                 from_zone[new_zone] = (zone, turn)
                 new_f = new_g + self.graph.best_op[nighbor]
-                heapq.heappush(tobo, (new_f, new_g, nighbor, to_move))
+                heapq.heappush(tobo, (new_f, new_g, nighbor.name, nighbor, to_move))
             
             wait_c = turn + 1
             if wait_c <= self.max_wait:
@@ -132,7 +132,7 @@ class Scheduler:
                         g_arch[wait_zone] = new_g
                         from_zone[wait_zone] = (zone, turn)
                         new_f = new_g + self.graph.best_op[zone]
-                        heapq.heappush(tobo, (new_f, new_g, zone, wait_c))
+                        heapq.heappush(tobo, (new_f, new_g, zone.name, zone, wait_c))
         return None
 
     def get_path(self, from_zone: dict, curr_zone: Tuple[Zone, int], start_turn: int) -> list[Tuple[Zone, int]]:
