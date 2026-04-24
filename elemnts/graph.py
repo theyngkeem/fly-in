@@ -7,6 +7,8 @@ import heapq
 class Graph:
     def __init__(self, zones: dict[str, Any], connection: list[dict],
                  nb_drone: int):
+        self.start_hub = None
+        self.end_hub = None
         self.zones = self.creat_zone(zones)
         self.connections = self.creat_conn(connection)
         self.map = self.creat_map()
@@ -19,16 +21,16 @@ class Graph:
         for zone in zones.values():
             optional = zone.get("optional", {})
             color = optional.get("color", "white")
-            zone_type = optional.get("zone", "normal")
+            zone_type = ZoneType(optional.get("zone") or "normal")
             max_drones = optional.get("max_drones", 1)
             el = Zone(zone["name"], color,
-                      ZoneType(zone_type),
+                      zone_type,
                       max_drones,
                       zone["type"],
                       zone["x"], zone["y"])
-            if el.name == "start_hub":
+            if el.is_srt:
                 self.start_hub = el
-            elif el.name == "end_hub":
+            elif el.is_end:
                 self.end_hub = el
             res[el.name] = el
         return res
@@ -87,7 +89,6 @@ class Graph:
             for nighbor, _ in self.get_nighbor(zone):
                 if not nighbor.accecible:
                     continue
-                ncost = 0
                 if nighbor.zone_type == ZoneType.priority:
                     ncost = cost + 0.9
                 else:

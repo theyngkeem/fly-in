@@ -48,11 +48,11 @@ class ReservationPath:
 
 class Scheduler:
     def __init__(self, graph: Graph):
+        self.max_wait = 100
+        self.maz_retry = 10
         self.graph = graph
         self.reservation = ReservationPath()
         self.stiemal_zaman = self.schudle()
-        self.max_wait = 100
-        self.maz_retry = 10
 
     def schudle(self) -> list[Drone]:
         """apply a star for each drone"""
@@ -67,7 +67,7 @@ class Scheduler:
                 retry += 1
             if path is None:
                 raise Exception(f"Drone {drone.drone_id} could not find path")
-            drone.path = path
+            drone.path_schdl = path
             self.reservation.use_path(path, self.graph)
         return self.graph.drones
 
@@ -102,9 +102,9 @@ class Scheduler:
         g_arch = {start: 0}
         while tobo:
             f, g, zone, turn = heapq.heappop(tobo)
-            if (zone.name, turn) in visited:
+            if (zone, turn) in visited:
                 continue
-            visited.add((zone.name, turn))
+            visited.add((zone, turn))
             if zone.is_end:
                 return self.get_path(from_zone, (zone, turn), start_turn)
             for nighbor, bridge in self.graph.get_nighbor(zone):
@@ -124,16 +124,16 @@ class Scheduler:
                 new_f = new_g + self.graph.best_op[nighbor]
                 heapq.heappush(tobo, (new_f, new_g, nighbor, to_move))
             
-            drone.wait_c = turn + 1
-            if drone.wait_c > self.max_wait:
-                if self.reservation.can_enter(zone, drone.wait_c):
+            wait_c = turn + 1
+            if wait_c <= self.max_wait:
+                if self.reservation.can_enter(zone, wait_c):
                     new_g = g + 1
-                    wait_zone = (zone, drone.wait_c)
+                    wait_zone = (zone, wait_c)
                     if wait_zone not in g_arch or new_g < g_arch[wait_zone]:
                         g_arch[wait_zone] = new_g
                         from_zone[wait_zone] = (zone, turn)
                         new_f = new_g + self.graph.best_op[zone]
-                        heapq.heappush(tobo, (new_f, new_g, zone, drone.wait_c))
+                        heapq.heappush(tobo, (new_f, new_g, zone, wait_c))
         return None
 
     def get_path(self, from_zone: dict, curr_zone: Tuple[Zone, int], start_turn: int) -> list[Tuple[Zone, int]]:
