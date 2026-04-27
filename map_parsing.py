@@ -1,15 +1,6 @@
 from typing import Callable, Any
 import re
 
-# KEY: dict[str, Callable] = {
-#     "nb_drones": lambda v: int(v),
-#     "start_hub": lambda x, y: (int(x), int(y)),
-#     "end_hub": lambda x, y: (int(x), int(y)),
-#     "hub": lambda x, y: (int(x), int(y)),
-#     "connection": lambda x, y: (int(x), int(y)),
-
-# }
-
 
 OP_KEY: dict[str, Callable] = {
     "max_drones": lambda x: int(x),

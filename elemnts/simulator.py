@@ -48,7 +48,7 @@ class Simulator:
                     drone.drone_state = DroneState.moving
                 output.append(el)
             line = " ".join(output)
-            print(f"Turn {turn}: {line}")
+            print(f"{line}")
         print(f"wslat talabiya f {turn}")
 
     def find_con(self, zone: Zone, to_zone: Zone) -> Bridge:
