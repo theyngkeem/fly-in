@@ -3,7 +3,7 @@ nb_drones: 8
 
 start_hub: start 0 0 [color=green max_drones=8]
 hub: maze_a1 1 0 [color=blue]
-hub: maze_a2 2 0 [color=blue]
+hub: maze_a2 2 0 [color=blue zone=priority]
 hub: maze_b1 1 1 [color=blue]
 hub: maze_b2 2 1 [color=blue]
 hub: maze_c1 1 2 [color=blue]
@@ -16,7 +16,7 @@ hub: trap_loop2 3 2 [zone=restricted color=orange]
 hub: bottleneck 4 1 [color=yellow max_drones=2]
 hub: final_stretch1 5 0 [zone=priority color=cyan]
 hub: final_stretch2 5 1 [zone=priority color=cyan]
-hub: final_stretch3 5 2 [zone=priority color=cyan]
+hub: final_stretch3 5 2 [zone=priority color=]
 end_hub: goal 6 1 [color=green max_drones=8]
 
 # Main path connections

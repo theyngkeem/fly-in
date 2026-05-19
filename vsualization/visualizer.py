@@ -3,24 +3,6 @@ import sys
 from elemnts import Scheduler
 
 
-COLORS = {
-    "green": (34, 197, 94),
-    "orange": (249, 115, 22),
-    "red": (239, 68, 68),
-    "purple": (168, 85, 247),
-    "blue": (59, 130, 246),
-    "cyan": (6, 182, 212),
-    "yellow": (234, 179, 8),
-    "gold": (245, 158, 11),
-    "magenta": (217, 70, 239),
-    "brown": (180, 83, 9),
-    "lime": (132, 204, 22),
-    "white": (255, 255, 255),
-    "gray": (156, 163, 175),
-    "black": (30, 30, 30),
-}
-
-
 class DroneAnimation:
     """Animates a drone moving from A to B"""
     def __init__(self, drone, from_zone, to_zone, duration_ms=800):
@@ -52,10 +34,11 @@ class DroneAnimation:
         x = from_x + (to_x - from_x) * t
         y = from_y + (to_y - from_y) * t
         return (x, y)
-    
+
 
 class Visualizer:
-    def __init__(self, schudeler: Scheduler, width: int = 800, hieght: int = 600):
+    def __init__(self, schudeler: Scheduler, width: int = 1200,
+                 hieght: int = 800):
         self.width = width
         self.hieght = hieght
         self.graph = schudeler.graph
@@ -70,7 +53,7 @@ class Visualizer:
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.cal_offset()
-        self.animations = []
+        self.animations: list[DroneAnimation] = []
 
     def goo_goo(self):
         """runing the main loop"""
@@ -96,6 +79,7 @@ class Visualizer:
                         self.offset_y -= 50
                     if event.key == pygame.K_UP:
                         self.offset_y += 50
+
             dt = self.clock.get_time()
             self.update_animations(dt)
             self.screen.fill((25, 25, 25))
@@ -132,7 +116,7 @@ class Visualizer:
             scale_x = usable_width / (max_x - min_x)
         else:
             scale_x = 50
-        
+
         if max_y > min_y:
             scale_y = usable_height / (max_y - min_y)
         else:
@@ -140,10 +124,9 @@ class Visualizer:
         self.scale = min(scale_x, scale_y, 80)
         center_x = (min_x + max_x) / 2
         center_y = (min_y + max_y) / 2
-        
         self.offset_x = self.width // 2 - center_x * self.scale
         self.offset_y = self.hieght // 2 - center_y * self.scale
-    
+
     def zone_to_screen(self, zone):
         """Convert zone (x, y) to screen pixels"""
         x = int(zone.x * self.scale + self.offset_x)
@@ -171,22 +154,22 @@ class Visualizer:
     def get_color(self, color_name: str):
         """tuple for a color name"""
         if color_name is None:
-            return COLORS["gray"]
-        
+            return tuple(pygame.Color("gray"))[:3]
+
         color_name = color_name.lower().strip()
         try:
-            return pygame.Color(color_name)
+            return tuple(pygame.Color(color_name))[:3]
         except ValueError:
-            print(f"Unknown color: {color_name}")
-            return COLORS["gray"]
+            return tuple(pygame.Color("gray"))[:3]
 
     def draw_drones(self):
         """Draw all drones (animating or static)"""
         for anim in self.animations:
             pos = anim.get_position(self.scale, self.offset_x, self.offset_y)
-            pygame.draw.circle(self.screen, (0, 255, 255), 
-                             (int(pos[0]), int(pos[1])), 8)
-            text = self.font.render(f"D{anim.drone.drone_id}", True, (255, 255, 255))
+            pygame.draw.circle(self.screen, (0, 255, 255),
+                               (int(pos[0]), int(pos[1])), 8)
+            text = self.font.render(f"D{anim.drone.drone_id}",
+                                    True, (255, 255, 255))
             text_rect = text.get_rect(center=(pos[0], pos[1] - 15))
             self.screen.blit(text, text_rect)
         for drone in self.scheduler.stiemal_zaman:
@@ -205,9 +188,9 @@ class Visualizer:
                 pygame.draw.circle(self.screen, (100, 255, 100), pos, 6)
 
     def draw_u(self):
-        """Ultra minimal - just turn number"""
-        text = self.font.render(f"{self.curr_turn}/{self.max_turn}", 
-                            True, (120, 120, 120))
+        """Ultra minimal just turn number"""
+        text = self.font.render(f"{self.curr_turn}/{self.max_turn}",
+                                True, (120, 120, 120))
         self.screen.blit(text, (10, 10))
 
     def update_animations(self, dt):
@@ -217,7 +200,7 @@ class Visualizer:
         self.animations = [a for a in self.animations if not a.complete]
 
     def build_events(self):
-        """Build dict: turn → list of (drone, from_zone, to_zone)"""
+        """Build dict: turn list"""
         from collections import defaultdict
         events = defaultdict(list)
         for drone in self.scheduler.stiemal_zaman:

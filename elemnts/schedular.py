@@ -15,7 +15,7 @@ class ReservationPath:
         if zone.is_srt or zone.is_end:
             return True
         return self.zone_reservation[zone.name][turn] < zone.capacity
-    
+
     def reserve_zone(self, zone: Zone, turn: int) -> None:
         """reserve zone for a turn"""
         self.zone_reservation[zone.name][turn] += 1
@@ -26,7 +26,7 @@ class ReservationPath:
 
     def can_use_bridge(self, bridge: Bridge, turn: int) -> bool:
         """check if bridge can be used"""
-        return self.bridge_reservation[bridge.dup_check()][turn] < bridge.capacity
+        return self.bridge_reservation[bridge.dup_check()][turn] < bridge.cp
 
     def use_path(self, path: list[Tuple[Zone, int]], graph: Graph) -> None:
         """use a path for a drone"""
@@ -73,11 +73,12 @@ class Scheduler:
             self.reservation.use_path(path, self.graph)
         return self.graph.drones
 
-    def calcul_flow(self) -> list[int]:
+    def calcul_flow(self) -> list:
         """calculate how much can i sed in the firt turn"""
         outflow = 0
-        for nighbor, bridge in self.graph.get_nighbor(self.graph.start_hub):
-            outflow += min(bridge.capacity, nighbor.capacity)
+        for nighbor, bridge in self.graph.get_nighbor(
+                    self.graph.start_hub):  # type:ignore
+            outflow += min(bridge.cp, nighbor.capacity)
         if outflow == 0:
             raise ValueError("no valid exit from start zone")
         start_flow = []
@@ -91,15 +92,15 @@ class Scheduler:
                 curr_turn += 1
         return start_flow
 
-    def a_star(self, drone: Drone, start_turn: int) -> list[Tuple[Zone, int]] | None:
+    def a_star(self, drone: Drone, start_turn: int) -> list | None:
         """a star to find the best path for drone"""
-        tobo = []
+        tobo: list = []
         start = (self.graph.start_hub, start_turn)
         g = 0
         f = g + self.graph.best_op[self.graph.start_hub]
-        heapq.heappush(tobo, (f, g, start[0].name, start[0], start[1]))
+        heapq.heappush(tobo, (f, g, "", start[0], start[1]))
         visited = set()
-        from_zone = {}
+        from_zone: dict = {}
         g_arch = {start: 0}
         while tobo:
             f, g, _, zone, turn = heapq.heappop(tobo)
@@ -123,8 +124,9 @@ class Scheduler:
                 g_arch[new_zone] = new_g
                 from_zone[new_zone] = (zone, turn)
                 new_f = new_g + self.graph.best_op[nighbor]
-                heapq.heappush(tobo, (new_f, new_g, nighbor.name, nighbor, to_move))
-            
+                heapq.heappush(tobo, (new_f, new_g, nighbor.name,
+                                      nighbor, to_move))
+
             wait_c = turn + 1
             if wait_c <= self.max_wait:
                 if self.reservation.can_enter(zone, wait_c):
@@ -134,12 +136,14 @@ class Scheduler:
                         g_arch[wait_zone] = new_g
                         from_zone[wait_zone] = (zone, turn)
                         new_f = new_g + self.graph.best_op[zone]
-                        heapq.heappush(tobo, (new_f, new_g, zone.name, zone, wait_c))
+                        heapq.heappush(tobo, (new_f, new_g, zone.name,
+                                              zone, wait_c))
         return None
 
-    def get_path(self, from_zone: dict, curr_zone: Tuple[Zone, int], start_turn: int) -> list[Tuple[Zone, int]]:
+    def get_path(self, from_zone: dict, curr_zone: Tuple[Zone, int],
+                 start_turn: int) -> list[Tuple[Zone | None, int]]:
         """get path from a star result"""
-        res = []
+        res: list[tuple[Zone | None, int]] = []
         while curr_zone in from_zone:
             res.append(curr_zone)
             curr_zone = from_zone[curr_zone]

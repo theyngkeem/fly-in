@@ -15,18 +15,20 @@ class Zone:
     def __init__(self, name: str, color: Optional[str],
                  zone_type: ZoneType, capacity: int, is_srtend: str, x: int,
                  y: int):
-        self.name = name
-        self.color = color if color is not None else "white"
-        self.zone_type = zone_type if zone_type is not None else ZoneType.normal
-        self.capacity = capacity if capacity is not None else 1
-        self.is_srt = True if is_srtend == "start_hub" else False
-        self.is_end = True if is_srtend == "end_hub" else False
-        if self.is_srt or self.is_end:
-            self.capacity = 9999
-        self.cost = 1 if zone_type != ZoneType.restricted else 2
-        self.accecible = False if zone_type == ZoneType.blocked else True
-        self.x = x
-        self.y = y
+            self.name = name
+            self.color = color if color is not None else "white"
+            self.zone_type = (
+                zone_type if zone_type is not None else ZoneType.normal
+            )
+            self.capacity = capacity if capacity is not None else 1
+            self.is_srt = True if is_srtend == "start_hub" else False
+            self.is_end = True if is_srtend == "end_hub" else False
+            if self.is_srt or self.is_end:
+                self.capacity = 9999
+            self.cost = 1 if zone_type != ZoneType.restricted else 2
+            self.accecible = False if zone_type == ZoneType.blocked else True
+            self.x = x
+            self.y = y
 
 
 class Bridge:
@@ -34,7 +36,7 @@ class Bridge:
     def __init__(self, first_zone: Zone, second_zone: Zone, capacity: int = 1):
         self.first_zone = first_zone
         self.second_zone = second_zone
-        self.capacity = capacity if capacity is not None else 1
+        self.cp = capacity if capacity is not None else 1
 
     def next_zone(self, zone: Zone) -> Zone:
         """get the other zone of the bridge"""

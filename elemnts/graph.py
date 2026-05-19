@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any
 from .zone import Zone, Bridge, ZoneType
 from .drone import Drone, DroneState
 import heapq
@@ -7,8 +7,8 @@ import heapq
 class Graph:
     def __init__(self, zones: dict[str, Any], connection: list[dict],
                  nb_drone: int):
-        self.start_hub = None
-        self.end_hub = None
+        self.start_hub: Zone | None = None
+        self.end_hub: Zone | None = None
         self.zones = self.creat_zone(zones)
         self.connections = self.creat_conn(connection)
         self.map = self.creat_map()
@@ -50,13 +50,13 @@ class Graph:
     def creat_drone(self, nb_drones: int) -> list[Drone]:
         """creat drones"""
         res = []
-        for i in range(nb_drones):
+        for i in range(1, nb_drones + 1):
             res.append(Drone(i, DroneState.waiting, self.start_hub))
         return res
-    
+
     def creat_map(self) -> dict[str, list[Bridge]]:
         """creat map of the graph"""
-        res = {}
+        res: dict = {}
         for br in self.connections:
             if br.first_zone.name in res:
                 res[br.first_zone.name].append(br)
@@ -68,7 +68,7 @@ class Graph:
                 res[br.second_zone.name] = [br]
         return res
 
-    def get_nighbor(self, zone: Zone) -> list[Tuple[Zone, Bridge]]:
+    def get_nighbor(self, zone: Zone) -> list:
         """get neighbor of a zone"""
         res = []
         for br in self.map.get(zone.name, []):
@@ -77,10 +77,10 @@ class Graph:
                 res.append((nighbor, br))
         return res
 
-    def djikstra(self) -> dict[Zone, float]:
+    def djikstra(self) -> dict[Zone | None, float]:
         """DJIKSTRA to get shortest path from end to zone givven"""
-        tobo = []
-        heapq.heappush(tobo, (0.0, self.end_hub.name, self.end_hub))
+        tobo: list = []
+        heapq.heappush(tobo, (0.0, "", self.end_hub))
         costs = {self.end_hub: 0.0}
         while tobo:
             cost, _, zone = heapq.heappop(tobo)

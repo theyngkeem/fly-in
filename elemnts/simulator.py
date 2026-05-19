@@ -1,7 +1,6 @@
 from .schedular import Scheduler
-from .graph import Graph, Zone, Bridge, ZoneType
-from .drone import Drone, DroneState
-from typing import Tuple, Any
+from .graph import Zone, Bridge
+from .drone import DroneState
 from collections import defaultdict
 
 
@@ -10,7 +9,7 @@ class Simulator:
         self.turn_ev = self.turn_event(sdl)
         self.scdl = sdl
 
-    def turn_event(self, sdl: Scheduler) -> dict[int, tuple[Drone, Zone, Zone, int]]:
+    def turn_event(self, sdl: Scheduler) -> dict:
         """read schudular"""
         res = defaultdict(list)
         for drone in sdl.stiemal_zaman:
@@ -18,7 +17,8 @@ class Simulator:
                 zone, turn = drone.path_schdl[i]
                 next_zone, next_turn = drone.path_schdl[i + 1]
                 if zone != next_zone:
-                    res[turn].append((drone, zone, next_zone, (next_turn - turn)))
+                    res[turn].append((drone, zone, next_zone,
+                                      (next_turn - turn)))
         return res
 
     def goo_goo_dolls(self) -> None:
@@ -33,7 +33,6 @@ class Simulator:
             for drone, zone, to_zone, dur in moves:
                 if dur == 2:
                     check = 1
-                    conn = self.find_con(zone, to_zone)
                     if check == 1:
                         check = 2
                         el = f"D{drone.drone_id}-{zone.name}-{to_zone.name}"

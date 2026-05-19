@@ -9,23 +9,14 @@ import pygame
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python main.py <map_file>")
+        print("try python pedri.py 'mapfile'")
         sys.exit(1)
-    
+
     try:
-        print("Parsing map...")
         parser = MapParser(sys.argv[1])
         parser.parse_map()
-
-        print("Building graph...")
         graph = Graph(parser.zones, parser.coonection, parser.nb_drones)
-        print(f"Graph built: {len(graph.zones)} zones, {len(graph.drones)} drones")
-
-        print("Scheduling drones...")
         scheduler = Scheduler(graph)
-        print(f"Scheduled {len(scheduler.stiemal_zaman)} drones")
-
-        print("\nRunning simulation...")
         simulator = Simulator(scheduler)
         simulator.goo_goo_dolls()
         vis = Visualizer(scheduler)

@@ -33,8 +33,8 @@ class MapParser:
     def __init__(self, path: str):
         self.path = path
         self.nb_drones = 0
-        self.coonection = []
-        self.zones = {}
+        self.coonection: list = []
+        self.zones: dict = {}
         self.start_hub_count = 0
         self.end_hub_count = 0
         self.current_line = 0
@@ -75,7 +75,7 @@ class MapParser:
 
     def parse_line(self, line: str) -> None:
         """trait every line"""
-        line_info = {}
+        line_info: dict[str, Any] = {}
         words = line.split()
         if not words[0].endswith(":"):
             raise ParseError(f"Line {self.current_line}: "
@@ -185,7 +185,7 @@ class MapParser:
             raise ParseError(
                 f"Line {self.current_line}: Connection requires 'zone1-zone2'"
             )
-        res = {}
+        res: dict[str, Any] = {}
         parts = words[0].split("-")
         if len(parts) != 2 or not parts[0] or not parts[1]:
             raise ParseError(f"Line {self.current_line}: Connection format "
