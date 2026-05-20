@@ -223,11 +223,11 @@ class Visualizer:
 
     def update_move(self):
         """Move to next turn"""
+        if len(self.animations) > 0:
+            return
         if self.curr_turn < self.max_turn:
             self.curr_turn += 1
             moves = self.turn_events.get(self.curr_turn, [])
             for drone, from_z, to_z in moves:
                 an = DroneAnimation(drone, from_z, to_z)
                 self.animations.append(an)
-        else:
-            print("Simulation complete!")

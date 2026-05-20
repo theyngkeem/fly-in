@@ -1,17 +1,26 @@
 import sys
-from map_parsing import MapParser
-from elemnts import Graph
-from elemnts.schedular import Scheduler
-from elemnts.simulator import Simulator
-from vsualization import Visualizer
-import pygame
+import importlib.util as im
+
+
+def check_pckg():
+    "checking the packages"
+    if im.find_spec("pygame") is None:
+        raise ImportError
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("try python pedri.py 'mapfile'")
-        sys.exit(1)
-
+    try:
+        check_pckg()
+        if len(sys.argv) < 2:
+            print("try python pedri.py 'mapfile'")
+            sys.exit(1)
+        from map_parsing import MapParser
+        from elemnts import Graph
+        from elemnts.schedular import Scheduler
+        from elemnts.simulator import Simulator
+        from vsualization import Visualizer
+    except ImportError:
+        print("the packages not installed yet")
     try:
         parser = MapParser(sys.argv[1])
         parser.parse_map()
@@ -24,5 +33,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        pygame.quit()
         sys.exit()

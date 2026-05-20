@@ -53,6 +53,8 @@ class Scheduler:
         self.max_wait = 100
         self.maz_retry = 10
         self.graph = graph
+        if self.graph.start_hub not in self.graph.best_op:
+            raise ValueError("cant reach start zone ")
         self.reservation = ReservationPath()
         self.stiemal_zaman = self.schudle()
 
