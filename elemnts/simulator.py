@@ -24,20 +24,21 @@ class Simulator:
     def goo_goo_dolls(self) -> None:
         """run the simulator and print the result"""
         turn = 0
+        mknasi: list = []
         while not self.check_all_delivered():
             moves = self.turn_ev.get(turn, [])
             turn += 1
             if not moves:
                 continue
             output = []
+            if mknasi:
+                for i in mknasi:
+                    output.append(i)
+                mknasi = []
             for drone, zone, to_zone, dur in moves:
                 if dur == 2:
-                    check = 1
-                    if check == 1:
-                        check = 2
-                        el = f"D{drone.drone_id}-{zone.name}-{to_zone.name}"
-                    else:
-                        el = f"D{drone.drone_id}-{to_zone.name}"
+                    el = f"D{drone.drone_id}-{zone.name}-{to_zone.name}"
+                    mknasi.append(f"D{drone.drone_id}-{to_zone.name}")
                 else:
                     el = f"D{drone.drone_id}-{to_zone.name}"
                 drone.current_zone = to_zone

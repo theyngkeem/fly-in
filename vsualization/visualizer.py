@@ -1,11 +1,13 @@
 import pygame
 import sys
-from elemnts import Scheduler
+from typing import Any
+from elemnts import Scheduler, Zone, Drone
 
 
 class DroneAnimation:
     """Animates a drone moving from A to B"""
-    def __init__(self, drone, from_zone, to_zone, duration_ms=800):
+    def __init__(self, drone: Drone, from_zone: Zone, to_zone: Zone,
+                 duration_ms: int = 800):
         self.drone = drone
         self.from_zone = from_zone
         self.to_zone = to_zone
@@ -13,18 +15,19 @@ class DroneAnimation:
         self.elapsed = 0
         self.complete = False
 
-    def update(self, dt):
+    def update(self, dt: int) -> None:
         """Update progress. dt = milliseconds since last frame"""
         self.elapsed += dt
         if self.elapsed >= self.duration:
             self.elapsed = self.duration
             self.complete = True
 
-    def get_progress(self):
+    def get_progress(self) -> Any:
         """Returns 0.0 to 1.0"""
         return min(1.0, self.elapsed / self.duration)
 
-    def get_position(self, scale, offset_x, offset_y):
+    def get_position(self, scale: Any, offset_x: float,
+                     offset_y: float) -> tuple:
         """Get current interpolated position"""
         t = self.get_progress()
         from_x = self.from_zone.x * scale + offset_x
@@ -38,7 +41,7 @@ class DroneAnimation:
 
 class Visualizer:
     def __init__(self, schudeler: Scheduler, width: int = 1200,
-                 hieght: int = 800):
+                 hieght: int = 800) -> None:
         self.width = width
         self.hieght = hieght
         self.graph = schudeler.graph
@@ -55,7 +58,7 @@ class Visualizer:
         self.cal_offset()
         self.animations: list[DroneAnimation] = []
 
-    def goo_goo(self):
+    def goo_goo(self) -> None:
         """runing the main loop"""
         running = True
         while running:
@@ -92,17 +95,17 @@ class Visualizer:
         pygame.quit()
         sys.exit()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset to turn 0"""
         self.curr_turn = 0
         self.animations.clear()
 
-    def cal_offset(self):
+    def cal_offset(self) -> None:
         """calculate offset to fit zones"""
         if not self.graph.zones:
-            self.scale = 50
-            self.offset_x = self.width // 2
-            self.offset_y = self.hieght // 2
+            self.scale: float = 50
+            self.offset_x: float = self.width // 2
+            self.offset_y: float = self.hieght // 2
             return
         zones_list = list(self.graph.zones.values())
         min_x = min(z.x for z in zones_list)
@@ -127,13 +130,13 @@ class Visualizer:
         self.offset_x = self.width // 2 - center_x * self.scale
         self.offset_y = self.hieght // 2 - center_y * self.scale
 
-    def zone_to_screen(self, zone):
+    def zone_to_screen(self, zone: Zone) -> tuple:
         """Convert zone (x, y) to screen pixels"""
         x = int(zone.x * self.scale + self.offset_x)
         y = int(zone.y * self.scale + self.offset_y)
         return (x, y)
 
-    def draw_zones(self):
+    def draw_zones(self) -> None:
         """Draw all zones as circles with their colors"""
         for zone in self.graph.zones.values():
             pos = self.zone_to_screen(zone)
@@ -144,14 +147,14 @@ class Visualizer:
             text_rect = text.get_rect(center=(pos[0], pos[1] - 35))
             self.screen.blit(text, text_rect)
 
-    def draw_connections(self):
+    def draw_connections(self) -> None:
         """Draw lines between connected zones"""
         for bridge in self.graph.connections:
             pos1 = self.zone_to_screen(bridge.first_zone)
             pos2 = self.zone_to_screen(bridge.second_zone)
             pygame.draw.line(self.screen, (70, 70, 90), pos1, pos2, 2)
 
-    def get_color(self, color_name: str):
+    def get_color(self, color_name: str) -> tuple:
         """tuple for a color name"""
         if color_name is None:
             return tuple(pygame.Color("gray"))[:3]
@@ -162,7 +165,7 @@ class Visualizer:
         except ValueError:
             return tuple(pygame.Color("gray"))[:3]
 
-    def draw_drones(self):
+    def draw_drones(self) -> None:
         """Draw all drones (animating or static)"""
         for anim in self.animations:
             pos = anim.get_position(self.scale, self.offset_x, self.offset_y)
@@ -187,19 +190,19 @@ class Visualizer:
                 pos = self.zone_to_screen(current_zone)
                 pygame.draw.circle(self.screen, (100, 255, 100), pos, 6)
 
-    def draw_u(self):
+    def draw_u(self) -> None:
         """Ultra minimal just turn number"""
         text = self.font.render(f"{self.curr_turn}/{self.max_turn}",
                                 True, (120, 120, 120))
         self.screen.blit(text, (10, 10))
 
-    def update_animations(self, dt):
+    def update_animations(self, dt: int) -> None:
         """Update all active animations"""
         for anim in self.animations:
             anim.update(dt)
         self.animations = [a for a in self.animations if not a.complete]
 
-    def build_events(self):
+    def build_events(self) -> dict:
         """Build dict: turn list"""
         from collections import defaultdict
         events = defaultdict(list)
@@ -212,7 +215,7 @@ class Visualizer:
                     events[turn + 1].append((drone, zone, next_zone))
         return events
 
-    def fmax_turn(self):
+    def fmax_turn(self) -> int:
         """Find last turn where any drone moves"""
         max_t = 0
         for drone in self.scheduler.stiemal_zaman:
@@ -221,7 +224,7 @@ class Visualizer:
                 max_t = max(max_t, last_turn)
         return max_t
 
-    def update_move(self):
+    def update_move(self) -> None:
         """Move to next turn"""
         if len(self.animations) > 0:
             return

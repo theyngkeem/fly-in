@@ -2,7 +2,7 @@ import sys
 import importlib.util as im
 
 
-def check_pckg():
+def check_pckg() -> None:
     "checking the packages"
     if im.find_spec("pygame") is None:
         raise ImportError

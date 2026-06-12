@@ -1,16 +1,16 @@
 from elemnts.drone import Drone
 from .graph import Zone, Bridge, Graph
 from collections import defaultdict
-from typing import Tuple
+from typing import Tuple, Any
 import heapq
 
 
 class ReservationPath:
-    def __init__(self):
-        self.zone_reservation = defaultdict(lambda: defaultdict(int))
-        self.bridge_reservation = defaultdict(lambda: defaultdict(int))
+    def __init__(self) -> None:
+        self.zone_reservation: dict = defaultdict(lambda: defaultdict(int))
+        self.bridge_reservation: dict = defaultdict(lambda: defaultdict(int))
 
-    def can_enter(self, zone: Zone, turn: int) -> bool:
+    def can_enter(self, zone: Zone, turn: int) -> Any:
         """check if drone can enter a zone"""
         if zone.is_srt or zone.is_end:
             return True
@@ -24,7 +24,7 @@ class ReservationPath:
         """reserve bridge for a turn"""
         self.bridge_reservation[bridge.dup_check()][turn] += 1
 
-    def can_use_bridge(self, bridge: Bridge, turn: int) -> bool:
+    def can_use_bridge(self, bridge: Bridge, turn: int) -> Any:
         """check if bridge can be used"""
         return self.bridge_reservation[bridge.dup_check()][turn] < bridge.cp
 

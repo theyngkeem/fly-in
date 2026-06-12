@@ -1,5 +1,6 @@
 from enum import Enum
 from .zone import Zone
+from typing import Any
 
 
 class DroneState(Enum):
@@ -22,7 +23,7 @@ class Drone:
         self.wait_c = 0
         self.path_index = 0
 
-    def next_zone(self) -> Zone | None:
+    def next_zone(self) -> Any:
         """get next zone from path"""
         if self.path_index + 1 < len(self.path):
             return self.path[self.path_index + 1]

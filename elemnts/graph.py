@@ -90,9 +90,9 @@ class Graph:
                 if not nighbor.accecible:
                     continue
                 if nighbor.zone_type == ZoneType.priority:
-                    ncost = cost + 0.9
+                    ncost = cost + 0
                 else:
-                    ncost = cost + nighbor.cost
+                    ncost = cost + 8000
                 if nighbor not in costs or ncost < costs[nighbor]:
                     costs[nighbor] = ncost
                     heapq.heappush(tobo, (ncost, nighbor.name, nighbor))
