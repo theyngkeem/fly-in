@@ -30,6 +30,7 @@ class Drone:
         return None
 
     def is_delivered(self) -> bool:
+        "checking if the drone is deliveed"
         if self.drone_state == DroneState.delivered:
             return True
         return False
