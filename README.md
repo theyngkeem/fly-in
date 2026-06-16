@@ -215,3 +215,4 @@ AI (Claude) was used in the following parts of this project:
 - Generating the initial structure and skeleton of the `Scheduler` class and `ReservationPath` logic
 - Helping debug edge cases in the restricted zone (2-turn movement) handling
 - Drafting sections of this README
+- Multi-Agent Path Finding With Heterogeneous Geometric
