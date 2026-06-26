@@ -112,6 +112,8 @@ class Scheduler:
             if zone.is_end:
                 return self.get_path(from_zone, (zone, turn), start_turn)
             for nighbor, bridge in self.graph.get_nighbor(zone):
+                if nighbor.is_srt:
+                    continue
                 to_move = turn + nighbor.cost
                 if to_move > self.max_wait:
                     continue

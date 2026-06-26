@@ -171,6 +171,8 @@ class MapParser:
             if key in op:
                 try:
                     res[key] = OP_KEY[key](op[key])
+                    if res[key] < 1:
+                        raise ParseError
                 except Exception:
                     raise ParseError(
                         f"Line {self.current_line}: Invalid value for '{key}'"
