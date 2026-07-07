@@ -171,7 +171,7 @@ class MapParser:
             if key in op:
                 try:
                     res[key] = OP_KEY[key](op[key])
-                    if res[key] < 1:
+                    if isinstance(res[key], int) and res[key] < 1:
                         raise ParseError
                 except Exception:
                     raise ParseError(
