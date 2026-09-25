@@ -5,7 +5,10 @@ from collections import defaultdict
 
 
 class Simulator:
+    """Convert scheduled paths into turn-by-turn terminal output."""
+
     def __init__(self, sdl: Scheduler) -> None:
+        """Initialize the simulator from a completed schedule."""
         self.turn_ev = self.turn_event(sdl)
         self.scdl = sdl
 
@@ -28,28 +31,29 @@ class Simulator:
         while not self.check_all_delivered():
             moves = self.turn_ev.get(turn, [])
             turn += 1
-            if not moves:
+            if not moves and not mknasi:
                 continue
             output = []
             if mknasi:
-                for i in mknasi:
-                    output.append(i)
+                for d, des in mknasi:
+                    output.append(f"D{d.drone_id}-{des.name}")
+                    if des.is_end:
+                        d.drone_state = DroneState.delivered
                 mknasi = []
             for drone, zone, to_zone, dur in moves:
                 if dur == 2:
                     el = f"D{drone.drone_id}-{zone.name}-{to_zone.name}"
-                    mknasi.append(f"D{drone.drone_id}-{to_zone.name}")
+                    mknasi.append((drone, to_zone))
                 else:
                     el = f"D{drone.drone_id}-{to_zone.name}"
                 drone.current_zone = to_zone
-                if to_zone.is_end:
+                if to_zone.is_end and dur == 1:
                     drone.drone_state = DroneState.delivered
                 else:
                     drone.drone_state = DroneState.moving
                 output.append(el)
             line = " ".join(output)
             print(f"{line}")
-        print(f"wslat talabiya f {turn}")
 
     def find_con(self, zone: Zone, to_zone: Zone) -> Bridge:
         """find exact connection"""

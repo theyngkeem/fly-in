@@ -5,8 +5,10 @@ import heapq
 
 
 class Graph:
+    """Represent the zone network and its routing information."""
     def __init__(self, zones: dict[str, Any], connection: list[dict],
                  nb_drone: int):
+        """Build the graph from parsed zones, connections,drones"""
         self.start_hub: Zone | None = None
         self.end_hub: Zone | None = None
         self.zones = self.creat_zone(zones)
@@ -90,9 +92,9 @@ class Graph:
                 if not nighbor.accecible:
                     continue
                 if nighbor.zone_type == ZoneType.priority:
-                    ncost = cost + 0
+                    ncost = cost
                 else:
-                    ncost = cost + 8000
+                    ncost = cost + zone.cost
                 if nighbor not in costs or ncost < costs[nighbor]:
                     costs[nighbor] = ncost
                     heapq.heappush(tobo, (ncost, nighbor.name, nighbor))

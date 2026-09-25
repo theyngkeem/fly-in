@@ -15,6 +15,7 @@ class Zone:
     def __init__(self, name: str, color: Optional[str],
                  zone_type: ZoneType, capacity: int, is_srtend: str, x: int,
                  y: int):
+        """Initialize a zone and its movement and capacity properties."""
         self.name = name
         self.color = color if color is not None else "white"
         self.zone_type = (
@@ -34,6 +35,7 @@ class Zone:
 class Bridge:
     """connection between zones"""
     def __init__(self, first_zone: Zone, second_zone: Zone, capacity: int = 1):
+        """Initialize a bidirectional connection between two zones."""
         self.first_zone = first_zone
         self.second_zone = second_zone
         self.cp = capacity if capacity is not None else 1

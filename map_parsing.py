@@ -25,12 +25,15 @@ CHECK_KEY: list[str] = [
 
 
 class ParseError(Exception):
+    """Report invalid map syntax or values."""
+
     pass
 
 
 class MapParser:
     """respect OOP rule and parse the map"""
     def __init__(self, path: str):
+        """Initialize parser state for the map at the given path."""
         self.path = path
         self.nb_drones = 0
         self.coonection: list = []
@@ -55,7 +58,7 @@ class MapParser:
                 elif "#" in line:
                     tmp = line.split("#")
                     line = tmp[0]
-                elif flag:
+                if flag:
                     flag = False
                     if not line.startswith("nb_drones:"):
                         raise ParseError(
@@ -131,17 +134,20 @@ class MapParser:
             raise ParseError(f"Line {self.current_line}: x and y must "
                              "be valid integers")
         if len(words) > 4:
-            line_info["optional"] = self.parse_opsett(words[4:], ZONE_KEYS)
+            line_info["optional"] = self.parse_opsett(
+                words[4:],
+                ZONE_KEYS,
+                line_info["type"] in {"start_hub", "end_hub"})
         if line_info["name"] in self.zones:
             raise ParseError(f"Line {self.current_line}: Zone "
                              f"'{line_info['name']}' "
                              "already defined")
         self.zones[line_info["name"]] = line_info
 
-    def parse_opsett(self, words: list[str],
-                     allowed_keys: set[str]) -> dict[str, Any]:
+    def parse_opsett(self, words: list[str], allowed_keys: set[str],
+                     ig_max_dr: bool = False) -> dict[str, Any]:
         """split optional params"""
-        res = {}
+        res: dict[Any, Any] = {}
         op = {}
         optional = " ".join(words)
         check = re.fullmatch(r"\[([^\]]+)\]", optional.strip())
@@ -169,6 +175,9 @@ class MapParser:
                                  f"key '{key}'")
         for key in allowed_keys:
             if key in op:
+                if key == "max_drones" and ig_max_dr:
+                    res[key] = None
+                    continue
                 try:
                     res[key] = OP_KEY[key](op[key])
                     if isinstance(res[key], int) and res[key] < 1:

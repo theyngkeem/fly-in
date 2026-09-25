@@ -8,6 +8,7 @@ class DroneAnimation:
     """Animates a drone moving from A to B"""
     def __init__(self, drone: Drone, from_zone: Zone, to_zone: Zone,
                  duration_ms: int = 800):
+        """Initialize an animation between two zones for one drone."""
         self.drone = drone
         self.from_zone = from_zone
         self.to_zone = to_zone
@@ -40,8 +41,11 @@ class DroneAnimation:
 
 
 class Visualizer:
+    """Display the scheduled graph and animate drone movements."""
+
     def __init__(self, schudeler: Scheduler, width: int = 1200,
                  hieght: int = 800) -> None:
+        """Initialize the Pygame window and visualization state."""
         self.width = width
         self.hieght = hieght
         self.graph = schudeler.graph

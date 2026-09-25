@@ -21,6 +21,7 @@ if __name__ == "__main__":
         from vsualization import Visualizer
     except ImportError:
         print("the packages not installed yet")
+        sys.exit(1)
     try:
         parser = MapParser(sys.argv[1])
         parser.parse_map()
@@ -32,5 +33,4 @@ if __name__ == "__main__":
         vis.goo_goo()
     except Exception as e:
         print(f"Error: {e}")
-    finally:
-        sys.exit()
+        sys.exit(1)

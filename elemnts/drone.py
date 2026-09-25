@@ -15,6 +15,7 @@ class Drone:
     """drone class used to represent drone in the program"""
     def __init__(self, id: int, drone_state: DroneState,
                  current_zone: Zone | None):
+        """Initialize a drone with its identifier, state,current zone"""
         self.drone_id = id
         self.drone_state = drone_state
         self.current_zone = current_zone

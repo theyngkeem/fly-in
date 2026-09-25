@@ -6,7 +6,10 @@ import heapq
 
 
 class ReservationPath:
+    """Track zone and bridge capacity reservations by turn."""
+
     def __init__(self) -> None:
+        """Initialize empty reservation tables."""
         self.zone_reservation: dict = defaultdict(lambda: defaultdict(int))
         self.bridge_reservation: dict = defaultdict(lambda: defaultdict(int))
 
@@ -49,8 +52,10 @@ class ReservationPath:
 
 
 class Scheduler:
+    """Schedule conflict-free paths for every drone in a graph."""
+
     def __init__(self, graph: Graph):
-        self.max_wait = 100
+        """Initialize the scheduler and calculate all drone paths."""
         self.maz_retry = 10
         self.graph = graph
         if self.graph.start_hub not in self.graph.best_op:
@@ -98,6 +103,11 @@ class Scheduler:
         """a star to find the best path for drone"""
         tobo: list = []
         start = (self.graph.start_hub, start_turn)
+        last_delivery = max(
+            (d.path_schdl[-1][1]
+             for d in self.graph.drones if d.path_schdl),
+            default=start_turn)
+        max_turn = max(start_turn, last_delivery) + 2 * len(self.graph.zones)
         g = 0
         f = g + self.graph.best_op[self.graph.start_hub]
         heapq.heappush(tobo, (f, g, "", start[0], start[1]))
@@ -115,7 +125,7 @@ class Scheduler:
                 if nighbor.is_srt:
                     continue
                 to_move = turn + nighbor.cost
-                if to_move > self.max_wait:
+                if to_move > max_turn:
                     continue
                 if not self.reservation.can_enter(nighbor, to_move):
                     continue
@@ -123,7 +133,7 @@ class Scheduler:
                     continue
                 new_g = g + nighbor.cost
                 new_zone = (nighbor, to_move)
-                if new_zone in g_arch and new_g > g_arch[new_zone]:
+                if new_zone in g_arch and new_g >= g_arch[new_zone]:
                     continue
                 g_arch[new_zone] = new_g
                 from_zone[new_zone] = (zone, turn)
@@ -132,7 +142,7 @@ class Scheduler:
                                       nighbor, to_move))
 
             wait_c = turn + 1
-            if wait_c <= self.max_wait:
+            if wait_c <= max_turn:
                 if self.reservation.can_enter(zone, wait_c):
                     new_g = g + 1
                     wait_zone = (zone, wait_c)
