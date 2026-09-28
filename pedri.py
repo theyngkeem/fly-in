@@ -1,4 +1,5 @@
 import sys
+import os
 import importlib.util as im
 
 
@@ -9,6 +10,7 @@ def check_pckg() -> None:
 
 
 if __name__ == "__main__":
+    os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
     try:
         check_pckg()
         if len(sys.argv) < 2:

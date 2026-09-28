@@ -28,6 +28,8 @@ The system parses a custom map format describing zone types, capacities, and con
 ### Installation
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 make install
 ```
 
@@ -38,16 +40,16 @@ This installs all dependencies listed in `requirements.txt` (`pygame`, `flake8`,
 ```bash
 make run
 # or directly:
-python3 pedri.py "ur mapfile"
+python3 pedri.py mapfile.txt
 ```
 
-Replace the map file path with any file from the `maps/` directory, or use your own custom map.
+The repository includes `mapfile.txt`. You can also pass your own map, or a map extracted from the subject's separate `maps.tar.gz` archive.
 
 ### Debug mode
 
 ```bash
 make debug
-# opens pdb on the main script
+# opens pdb with mapfile.txt; enter c to continue
 ```
 
 ### Linting
@@ -68,19 +70,18 @@ make clean
 
 ## Usage Examples
 
+Save the small map in **Map File Format** below as `example.txt`, then run:
+
 ```bash
-python3 pedri.py maps/easy/01_linear_path.txt
-python3 pedri.py maps/medium/03_priority_puzzle.txt
-python3 pedri.py maps/hard/03_ultimate_challenge.txt
+python3 pedri.py example.txt
 ```
 
-**Terminal output example:**
+**Expected terminal output for that map:**
 
-```
-D1-roof1 D2-corridorA
-D1-roof2 D2-tunnelB
-D1-goal D2-goal
-wslat talabiya f 3
+```text
+D1-corridorA
+D1-goal D2-corridorA
+D2-goal
 ```
 
 Each line represents one simulation turn. Drones that are not moving in a given turn are omitted. Drones traversing a restricted zone (2-turn cost) are shown mid-transit in the format `D<ID>-<from>-<to>` on the first turn and `D<ID>-<to>` on the second.
@@ -90,9 +91,10 @@ Each line represents one simulation turn. Drones that are not moving in a given 
 | Key | Action |
 |-----|--------|
 | `SPACE` | Advance one turn |
-| `R` | Reset to turn 0 |
+| `R` | Reset to turn 0 and fit the graph |
 | `+` / `-` | Zoom in / out |
 | Arrow keys | Pan the view |
+| `ESC` | Close the window |
 
 ---
 
@@ -101,7 +103,7 @@ Each line represents one simulation turn. Drones that are not moving in a given 
 Maps use a plain-text format with the following syntax:
 
 ```
-nb_drones: 5
+nb_drones: 2
 
 start_hub: hub 0 0 [color=green]
 end_hub: goal 10 10 [color=yellow]
@@ -110,7 +112,9 @@ hub: corridorA 4 3 [zone=priority color=green max_drones=2]
 hub: obstacleX 5 5 [zone=blocked color=gray]
 
 connection: hub-roof1
+connection: hub-corridorA
 connection: corridorA-roof1 [max_link_capacity=2]
+connection: corridorA-goal
 ```
 
 **Zone types and movement costs:**
@@ -134,7 +138,7 @@ The graph is built from parsed map data as a set of `Zone` objects (nodes) and `
 
 ### 2. Dijkstra Pre-Computation (Heuristic)
 
-Before scheduling any drone, Dijkstra's algorithm is run **backwards from the end zone** over the entire graph. This produces a distance map from every zone to the goal, which is used as the admissible heuristic `h(n)` in each drone's A\* search. Priority zones are given a cost of 0 (preferred), while normal and restricted zones cost 8000, making A\* strongly prefer priority paths.
+Before scheduling any drone, Dijkstra's algorithm is run **backwards from the end zone**. For a backward step from `zone` to `neighbor`, the cost is zero if `neighbor` is a priority zone; otherwise it is `zone.cost`, the cost of the corresponding forward move. These discounted distances form an admissible lower bound `h(n)` for A\*. Actual moves still cost 1 or 2 turns; priority influences search order without making travel instantaneous.
 
 **Complexity:** O((V + E) log V) once, amortized across all drones.
 
@@ -154,14 +158,16 @@ Once a path is found for a drone, it is committed to the reservation table (`use
 
 **Key properties:**
 - Conflict-free by construction — no two drones can collide if the reservation table is respected
-- Start and end zones have infinite capacity (no reservation needed)
+- Start and end zones bypass occupancy checks; connection capacities still apply
 - Restricted zones cost 2 turns; the drone occupies the connection during transit and must complete the move on the next turn
 
-**Complexity per drone:** O((T × V + E) log(T × V)) where T is the max turn horizon.
+**Search complexity per drone:** O(T × (V + E) log(T × V)), where T is the number of turns searched. The schedule-dependent horizon is finite: `max(start_turn, last_delivery) + 2 × V`. After previous drones finish, this leaves enough time to traverse a simple path. This is a search bound, not a delay imposed on departures.
+
+Each drone is planned around earlier reservations. This approach meets the supplied benchmarks but does not guarantee the globally fewest turns for every map.
 
 ### 5. Retry Logic
 
-If A\* fails to find a path (e.g., all paths are blocked due to reservations), the scheduler bumps the drone's start turn by 1 and retries up to 10 times. This handles cases where a drone simply needs to wait a bit before a path opens.
+A fallback still retries A\* up to 10 times with a later start turn if no path is found. Normal congestion is handled by waiting inside the search; the calculated horizon replaces the old fixed 100-turn cutoff.
 
 ### 6. Simulation Output
 
@@ -173,10 +179,11 @@ The `Simulator` reads the scheduled paths and converts them into a turn-indexed 
 
 After the terminal simulation completes, a Pygame window opens showing the full zone graph.
 
-- **Zones** are drawn as colored circles using the colors specified in the map metadata (any valid pygame color name is accepted).
+- **Zones** use the map's colors, with labels for start, end, and special zone types. Unknown color names use gray.
 - **Connections** are drawn as lines between zones.
-- **Drones** are shown as cyan dots that smoothly animate between zones when `SPACE` is pressed.
-- **Turn counter** is displayed in the top-left corner.
+- **Drones** appear as cyan dots with an ID, or a count when several share a position. Press `SPACE` to advance one turn.
+- **Restricted moves** stop halfway along the connection on the first turn and arrive on the next. Waiting drones stay visible; delivered drones disappear at their scheduled arrival.
+- **Status and controls** show the current turn, delivered count, and keyboard shortcuts. `R` restarts the replay and restores the view.
 
 The visualizer uses the same scheduled path data as the simulator — no re-computation is needed. The auto-scaling offset algorithm ensures the graph fits the window regardless of coordinate ranges.
 
@@ -211,8 +218,8 @@ The graphical interface provides a clear way to follow the simulation step by st
 
 ### AI Usage
 
-AI (Claude) was used in the following parts of this project:
-- Generating the initial structure and skeleton of the `Scheduler` class and `ReservationPath` logic
+AI was used in the following parts of this project:
 - Helping debug edge cases in the restricted zone (2-turn movement) handling
-- Drafting sections of this README
-- Multi-Agent Path Finding With Heterogeneous Geometric
+- review the project against the subject
+- test edge cases
+- update this README.

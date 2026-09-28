@@ -5,7 +5,7 @@ run:
 	python3 pedri.py mapfile.txt
 
 debug:
-	python3 -m pdb pedri.py
+	python3 -m pdb pedri.py mapfile.txt
 
 clean:
 	@find . -type d -name __pycache__ -exec rm -rf {} +
