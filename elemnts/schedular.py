@@ -110,12 +110,14 @@ class Scheduler:
         max_turn = max(start_turn, last_delivery) + 2 * len(self.graph.zones)
         g = 0
         f = g + self.graph.best_op[self.graph.start_hub]
-        heapq.heappush(tobo, (f, g, "", start[0], start[1]))
+        heapq.heappush(tobo, (f, g, 0, "", start[0], start[1]))
         visited = set()
         from_zone: dict = {}
-        g_arch = {start: 0}
+        g_arch = {start: (0, 0)}
         while tobo:
-            f, g, _, zone, turn = heapq.heappop(tobo)
+            f, g, start_waits, _, zone, turn = heapq.heappop(tobo)
+            if (g, start_waits) != g_arch[(zone, turn)]:
+                continue
             if (zone, turn) in visited:
                 continue
             visited.add((zone, turn))
@@ -133,24 +135,28 @@ class Scheduler:
                     continue
                 new_g = g + nighbor.cost
                 new_zone = (nighbor, to_move)
-                if new_zone in g_arch and new_g >= g_arch[new_zone]:
+                score = (new_g, start_waits)
+                if score >= g_arch.get(new_zone, (float("inf"), float("inf"))):
                     continue
-                g_arch[new_zone] = new_g
+                g_arch[new_zone] = score
                 from_zone[new_zone] = (zone, turn)
                 new_f = new_g + self.graph.best_op[nighbor]
-                heapq.heappush(tobo, (new_f, new_g, nighbor.name,
-                                      nighbor, to_move))
+                heapq.heappush(tobo, (new_f, new_g, start_waits,
+                                      nighbor.name, nighbor, to_move))
 
             wait_c = turn + 1
             if wait_c <= max_turn:
                 if self.reservation.can_enter(zone, wait_c):
                     new_g = g + 1
                     wait_zone = (zone, wait_c)
-                    if wait_zone not in g_arch or new_g < g_arch[wait_zone]:
-                        g_arch[wait_zone] = new_g
+                    waits = start_waits + int(zone.is_srt)
+                    score = (new_g, waits)
+                    if score < g_arch.get(wait_zone,
+                                          (float("inf"), float("inf"))):
+                        g_arch[wait_zone] = score
                         from_zone[wait_zone] = (zone, turn)
                         new_f = new_g + self.graph.best_op[zone]
-                        heapq.heappush(tobo, (new_f, new_g, zone.name,
+                        heapq.heappush(tobo, (new_f, new_g, waits, zone.name,
                                               zone, wait_c))
         return None
 

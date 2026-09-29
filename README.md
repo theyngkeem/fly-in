@@ -163,7 +163,7 @@ Once a path is found for a drone, it is committed to the reservation table (`use
 
 **Search complexity per drone:** O(T × (V + E) log(T × V)), where T is the number of turns searched. The schedule-dependent horizon is finite: `max(start_turn, last_delivery) + 2 × V`. After previous drones finish, this leaves enough time to traverse a simple path. This is a search bound, not a delay imposed on departures.
 
-Each drone is planned around earlier reservations. This approach meets the supplied benchmarks but does not guarantee the globally fewest turns for every map.
+Each drone is planned around earlier reservations. This approach does not guarantee the globally fewest turns for every map.
 
 ### 5. Retry Logic
 
@@ -193,18 +193,20 @@ The graphical interface provides a clear way to follow the simulation step by st
 
 ## Performance Benchmarks
 
-| Map | Drones | Target | Notes |
-|-----|--------|--------|-------|
-| Easy: linear path | 2 | ≤ 6 turns | |
-| Easy: simple fork | 4 | ≤ 8 turns | |
-| Easy: basic capacity | 4 | ≤ 6 turns | |
-| Medium: dead end trap | 5 | ≤ 12 turns | |
-| Medium: circular loop | 6 | ≤ 15 turns | |
-| Medium: priority puzzle | 5 | ≤ 12 turns | |
-| Hard: maze nightmare | 8 | ≤ 30 turns | |
-| Hard: capacity hell | 12 | ≤ 35 turns | |
-| Hard: ultimate challenge | 15 | ≤ 45 turns | |
-| Challenger: impossible dream | 25 | Beat 45 turns | Optional |
+The revised subject gives one optimum turn count for each supplied map. These are optimization targets; a valid schedule may take more turns.
+
+| Map | Drones | Optimum |
+|-----|--------|---------|
+| Easy: linear path | 2 | 4 turns |
+| Easy: simple fork | 4 | 4 turns |
+| Easy: basic capacity | 4 | 4 turns |
+| Medium: dead end trap | 5 | 8 turns |
+| Medium: circular loop | 6 | 10 turns |
+| Medium: priority puzzle | 5 | 6 turns |
+| Hard: maze nightmare | 8 | 13 turns |
+| Hard: capacity hell | 12 | 16 turns |
+| Hard: ultimate challenge | 15 | 26 turns |
+| Challenger: impossible dream (optional) | 25 | 43 turns |
 
 ---
 
@@ -219,7 +221,6 @@ The graphical interface provides a clear way to follow the simulation step by st
 ### AI Usage
 
 AI was used in the following parts of this project:
-- Helping debug edge cases in the restricted zone (2-turn movement) handling
 - review the project against the subject
 - test edge cases
 - update this README.

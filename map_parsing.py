@@ -161,6 +161,10 @@ class MapParser:
                 raise ParseError(f"Line {self.current_line}: optional params"
                                  " must be in format [key=value]")
             key, value = word.split("=", 1)
+            if not value and not (key == "max_drones" and ig_max_dr):
+                raise ParseError(
+                    f"Line {self.current_line}: Missing value for '{key}'"
+                )
             if key in op:
                 raise ParseError(
                     f"Line {self.current_line}: Duplicate metadata key '{key}'"
