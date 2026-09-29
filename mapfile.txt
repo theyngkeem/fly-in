@@ -6,7 +6,7 @@ hub:            P1    1 1     [color=blue zone=priority max_drones=1]
 hub:            P2    1 -1    [color=blue zone=priority max_drones=2]
 hub:            P3    1 0     [color=blue zone=priority max_drones=2]
 
-hub:            R1    2 1     [color=cyan zone=priority]
+hub:            R1    2 1     [color=cyan zone=blocked]
 hub:            R2    2 -1    [color=cyan zone=priority max_drones=2]
 hub:            R3    2 0     [color=cyan zone=priority]
 
