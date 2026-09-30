@@ -54,21 +54,12 @@ class Visualizer:
         pygame.init()
         self.font = pygame.font.Font(None, 20)
         self.screen = pygame.display.set_mode((width, hieght))
-        self.background = pygame.image.load("elemnts/media/ozama.webp").convert()
-        self.drone_image = pygame.image.load("elemnts/media/plane.webp").convert_alpha()
-        self.tower = pygame.image.load("elemnts/media/goal.webp").convert_alpha()
-        self.background = pygame.transform.smoothscale(
-        self.background, (width, hieght))
-        self.drone_image = pygame.transform.smoothscale(
-        self.drone_image, (40, 40))
-        self.tower = pygame.transform.smoothscale(
-        self.tower, (50, 50))
         self.graph = schudeler.graph
         self.scheduler = schudeler
         self.curr_turn = 0
         self.max_turn = self.fmax_turn()
         self.turn_events = self.build_events()
-        pygame.display.set_caption("fly-in NewYork")
+        pygame.display.set_caption("fly-in")
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.scale: float = 1.0
@@ -107,7 +98,7 @@ class Visualizer:
 
             dt = self.clock.get_time()
             self.update_animations(dt)
-            self.screen.blit(self.background, (0, 0))
+            self.screen.fill((25, 25, 25))
             self.draw_connections()
             self.draw_zones()
             self.draw_drones()
@@ -163,11 +154,9 @@ class Visualizer:
         for zone in self.graph.zones.values():
             pos = self.zone_to_screen(zone)
             color = self.get_color(zone.color)
+            pygame.draw.circle(self.screen, color, pos, 20)
             if zone.is_end:
-                rect = self.tower.get_rect(center=pos)
-                self.screen.blit(self.tower, rect)
-            else:
-                pygame.draw.circle(self.screen, color, pos, 20)
+                pygame.draw.circle(self.screen, (220, 220, 220), pos, 20, 2)
             text = self.font.render(zone.name, True, (220, 220, 220))
             text_rect = text.get_rect(center=(pos[0], pos[1] - 35))
             pygame.draw.rect(self.screen, (25, 25, 25),
@@ -234,11 +223,10 @@ class Visualizer:
                 y = pos[1] * self.scale + self.offset_y
             positions.setdefault((int(x), int(y)), []).append(drone.drone_id)
         for pos, ids in positions.items():
-            rect = self.drone_image.get_rect(center=pos)
-            self.screen.blit(self.drone_image, rect)
+            pygame.draw.circle(self.screen, (0, 220, 220), pos, 6)
             label = f"D{ids[0]}" if len(ids) == 1 else f"{len(ids)} drones"
             text = self.font.render(label, True, (220, 220, 220))
-            rect = text.get_rect(center=(pos[0], pos[1] - 30))
+            rect = text.get_rect(center=(pos[0], pos[1] - 17))
             pygame.draw.rect(self.screen, (25, 25, 25), rect.inflate(6, 2))
             self.screen.blit(text, rect)
 
